@@ -4,21 +4,6 @@ from sqlalchemy import Boolean, Column, Integer, String, Date, Float
 
 from bcv_api.database import Base
 
-
-class User(Base):
-    """User model."""
-
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-    api_key = Column(String)
-    requests = Column(Integer, default=0)
-    max_requests = Column(Integer, default=10)
-
-
 class Rate(Base):
     """Rate model."""
 

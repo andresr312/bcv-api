@@ -11,10 +11,7 @@ class Settings(BaseSettings):
     description: str = """This API allows you to get the exchange rate for USD from the BCV (Banco Central de Venezuela). 🚀
 
     - / [GET]: Get the exchange rate for USD from the database.
-    - / [POST] Create a new rate in the database using the BCV API.
     - /{rate_date} [GET]: Get the rate for a specific date from the database.
-    - /token [POST]: Login endpoint to get a JWT token.
-    - /users/me [GET]: Get the current user information.
     """
     version: str = "0.2.0"
     admin_email: str = "rafnixg@gmail.com"
@@ -29,15 +26,11 @@ class Settings(BaseSettings):
     }
     openapi_tags: list[dict] = [
         {
-            "name": "users",
-            "description": "Operations with users. The **login** logic is here.",
-        },
-        {
             "name": "rates",
             "description": "Operations with rates. Get the **exchange rate** for USD from the BCV.",
         },
     ]
-    secret_key: str
+    secret_key: str = ""
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     sql_alchemy_database_url: str = "sqlite:///./sql_app.db"

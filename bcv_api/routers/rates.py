@@ -28,8 +28,11 @@ def read_exchange_rate(db: Session = Depends(depends.get_db)) -> schemas.Exchang
     """
 
     rate = services.get_rate(db)
+    
+   
     if rate is None:
-        raise HTTPException(status_code=404, detail="No rates found.")
+         dollar_rate = bcv_service.get_exchange_rate()
+         rate = services.create_rate(db, rate=models.Rate(dollar=dollar_rate, date=date.today()))
     return schemas.ExchangeRate(dollar=rate.dollar, date=rate.date)
 
 
@@ -53,27 +56,3 @@ def read_rate(
         raise HTTPException(status_code=404, detail="Rate not found")
     return schemas.ExchangeRate(dollar=rate.dollar, date=rate.date)
 
-
-@router.post("/")
-def create_rate(
-    token: Annotated[str, Depends(depends.oauth2_scheme)],
-    db: Session = Depends(depends.get_db),
-) -> schemas.Rate:
-    """Create a new rate in the database using the BCV API.
-
-    Parameters:
-    ----------
-    token: str
-        Access token.
-
-    Returns:
-    -------
-    schemas.Rate
-    """
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    dollar_rate = bcv_service.get_exchange_rate()
-    rate = services.create_rate(
-        db, rate=models.Rate(dollar=dollar_rate, date=date.today())
-    )
-    return schemas.Rate(dollar=rate.dollar, date=rate.date, id=rate.id)

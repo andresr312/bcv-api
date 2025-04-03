@@ -5,7 +5,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from bcv_api import models, schemas, security
+from bcv_api import models, schemas
 from bcv_api.config import settings
 
 # RATE SERVICES
@@ -111,97 +111,3 @@ def update_rate(db: Session, rate: schemas.Rate) -> models.Rate:
         db.commit()
         db.refresh(db_rate)
     return db_rate
-
-
-# USER SERVICES
-
-
-def get_user_by_email(db: Session, email: str) -> models.User:
-    """Get a user by email.
-
-    Parameters:
-    ----------
-    db: Session
-        Database session.
-    email: str
-        User email.
-
-    Returns:
-    -------
-    models.User
-    """
-    return db.query(models.User).filter(models.User.email == email).first()
-
-
-def get_user(db: Session, email: str) -> schemas.User | None:
-    """Get a user from the database.
-
-    Parameters:
-    ----------
-    db: Session
-        Database session.
-    email: str
-        User email.
-
-    Returns:
-    -------
-    schemas.User | None
-    """
-    user = get_user_by_email(db, email)
-    if user:
-        return schemas.User(**user)
-
-
-def authenticate_user(db: Session, username: str, password: str) -> models.User | None:
-    """Authenticate a user.
-
-    Parameters:
-    ----------
-    db: Session
-        Database session.
-    username: str
-        User email.
-    password: str
-        User password.
-
-    Returns:
-    -------
-    models.User | None
-    """
-
-    user = get_user_by_email(db, username)
-    if not user:
-        return False
-    if not security.verify_password(password, user.hashed_password):
-        return False
-    return user
-
-
-def register_user(db: Session, user: schemas.UserCreate) -> models.User:
-    """Register a new user.
-
-    Parameters:
-    ----------
-    db: Session
-        Database session.
-    user: schemas.UserCreate
-        User to create.
-
-    Returns:
-    -------
-    models.User
-    """
-    access_token_expires = timedelta(days=settings.access_token_expire_minutes)
-    access_token = security.create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
-    db_user = models.User(
-        email=user.email,
-        hashed_password=security.get_password_hash(user.password),
-        api_key=access_token,
-        max_requests=settings.max_requests,
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user

@@ -27,7 +27,7 @@ def read_exchange_rate(db: Session = Depends(depends.get_db)) -> schemas.Exchang
     schemas.ExchangeRate
     """
 
-    rate = services.get_rate(db)
+    rate = services.get_rate_from_date(db, date.today())
     
    
     if rate is None:
